@@ -1,0 +1,267 @@
+from tkinter import *
+import pandas
+from tkinter import ttk
+from tkinter import messagebox
+#CONSTANTS
+NAVY_BLUE = "#364F6B"
+WHITE = "#FFFFFF"
+BOOK_LIMIT = 0
+
+#MAIN PROG
+try:
+    library_members_data = pandas.read_csv("library_members.csv")
+except FileNotFoundError:
+    library_members_data = pandas.read_csv("library_members - Sheet1 (1).csv")
+    library_members_list = library_members_data["NAMES"].to_list()
+else:
+    library_members_list = library_members_data["NAMES"].to_list()
+
+
+
+def landing_page():
+    def login():
+        name_login.set(name_login.get().upper())
+        if enter_name.get() in library_members_list:
+            login_window.destroy()
+            print("good soup")
+            borrow_or_return_page = Tk()
+            borrow_or_return_page.title("CASA DE COMMUNIDAD")
+            borrow_or_return_page.config(padx=20, pady=20, highlightthickness=0, bg=NAVY_BLUE)
+            logo_2 = Canvas(width=756,height=330, bg=NAVY_BLUE, highlightthicknes=0)
+            logo_2_icon = PhotoImage(file="image/logo_2-removebg-preview.png")
+            logo_2.create_image(378,165,image=logo_2_icon)
+            logo_2.grid(column=1,row=0)
+
+            borrow_button_logo = PhotoImage(file="image/borrow_logo.png")
+            return_button_logo = PhotoImage(file="image/return_logo.png")
+
+            def borrow_book():
+                borrow_or_return_page.destroy()
+                main_page = Tk()
+                main_page.title("Main page")
+                main_page.config(padx=20, pady=20, highlightthickness=0, bg=WHITE)
+
+                search_book_by = Label(text="Search book by: ", fg=NAVY_BLUE, bg=WHITE, font=("Roboto Slab", 14, "bold"))
+                search_book_by.grid(column=0, row=0)
+                title = Label(text="Title: ",fg=NAVY_BLUE, bg=WHITE, font=("Roboto Slab", 12))
+                title.grid(column=0,row=1,sticky="e")
+                author = Label(text="Author: ",fg=NAVY_BLUE, bg=WHITE, font=("Roboto Slab", 12))
+                author.grid(column=0,row=2,sticky="e")
+                subject_category = Label(text="Subject Category: ",fg=NAVY_BLUE, bg=WHITE, font=("Roboto Slab", 12))
+                subject_category.grid(column=0,row=3,sticky="e")
+                publication_date = Label(text="Publication Date: ", fg=NAVY_BLUE, bg=WHITE, font=("Roboto Slab", 12))
+                publication_date.grid(column=2,row=2,sticky="e")
+
+                title_entry = Entry(width=97,relief="groove",bg=WHITE)
+                title_entry.grid(column=1,row=1,sticky="w",columnspan=3)
+                author_entry = Entry(width=40,relief="groove",bg=WHITE)
+                author_entry.grid(column=1,row=2, columnspan=2,sticky="w")
+                subject_category_entry = Entry(width=40,relief="groove",bg=WHITE)
+                subject_category_entry.grid(column=1,row=3,sticky="w")
+                publication_date_entry = Entry(width=24,relief="groove",bg=WHITE)
+                publication_date_entry.grid(column=3,row=2)
+
+                def checkout_page():
+                    def thank_you_page():
+                        checkout_page.destroy()
+                        thank_you = Tk()
+                        thank_you.title("Thank you page")
+                        thank_you.config(padx=20,pady=20,bg=NAVY_BLUE)
+                        thank_you_canvas = Canvas(width=1100,height=760,highlightthickness=0)
+                        thank_you_image = PhotoImage(file="thank_you.png")
+                        thank_you_canvas.create_image(550,380,image=thank_you_image)
+                        thank_you_canvas.grid(column=1,row=0)
+                        thank_you.mainloop()
+
+                    main_page.destroy()
+                    checkout_page = Tk()
+                    checkout_page.title("Checkout Page")
+                    checkout_page.config(padx=20, pady=20, bg="white")
+                    confirm_checkout_button = Button(text="CONFIRM AND CHECKOUT", fg=WHITE, bg=NAVY_BLUE, width=31,
+                                                     height=2, command=thank_you_page)
+                    confirm_checkout_button.grid(column=7, row=0, sticky="e")
+                    checkout_tree = ttk.Treeview()
+                    books_data = pandas.read_csv("List of Books - Sheet1 (3).csv")
+                    print(books_data)
+                    df_column = books_data.columns.values
+                    print(len(df_column))
+                    print(df_column)
+                    checkout_tree["column"] = list(books_data.columns)
+                    checkout_tree["show"] = "headings"
+                    vsb = ttk.Scrollbar(orient="vertical", command=checkout_tree.yview())
+                    vsb.grid(column=8, row=1, sticky="ns")
+                    checkout_tree.configure(yscrollcommand=vsb.set)
+
+                    for column in checkout_tree['column']:
+                        checkout_tree.heading(column, text=column)
+
+                    df_rows = books_data.to_numpy().tolist()
+                    for row in df_rows:
+                        checkout_tree.insert("", "end", values=row)
+                    checkout_tree.grid(column=0, row=1, columnspan=8)
+
+                    checkout_page.mainloop()
+                def reserve():
+                    global BOOK_LIMIT
+                    if BOOK_LIMIT > 5:
+                        messagebox.showerror(title="Book limit has reached", message="You already posess 5 books")
+                    else:
+                        BOOK_LIMIT += 1
+                        item = tree.focus()
+                        values = tree.item(item,'values')
+                        if int(values[4]) > 0:
+                            messagebox.showerror(title="Book is available!", message="Book is still available, you can checkout this book")
+                        else:
+                            tree.item(item, text="",values=(values[0], values[1], values[2], values[3], int(values[4]) - 1, values[5]))
+                def search():
+                    build_query = ""
+                def add_to_cart_f():
+                    global BOOK_LIMIT
+                    if BOOK_LIMIT >= 5:
+                        messagebox.showerror(title="Book limit has reached", message="You already posess 5 books")
+                    else:
+                        BOOK_LIMIT += 1
+                        item = tree.focus()
+                        values = tree.item(item, 'values')
+                        if int(values[4]) < 1:
+                            messagebox.showerror(title="Book not available",
+                                                 message="Book is no longer available, you can ask for a reservation")
+                        else:
+                            tree.item(item, text="", values=(
+                            values[0], values[1], values[2], values[3], int(values[4]) - 1, values[5]))
+
+                reserve_button = Button(text="RESERVE" ,fg=WHITE, bg=NAVY_BLUE, width=20, command=reserve)
+                reserve_button.grid(column=5,row=5)
+                checkout_button = Button(text="CHECKOUT", fg=WHITE,bg="#6DA5A9",width=20,command=checkout_page)
+                checkout_button.grid(column=0,row=5,sticky="w")
+                search_button = Button(text="SEARCH", fg=WHITE,bg="pink", width=20, command=search)
+                search_button.grid(column=3,row=3)
+                add_to_cart = Button(text="ADD TO CART", fg=WHITE,bg="#7E370C", width=20,command=add_to_cart_f)
+                add_to_cart.grid(column=7, row=5,sticky="e")
+
+
+                tree = ttk.Treeview()
+                books_data = pandas.read_csv("List of Books - Sheet1 (3).csv")
+                df_column = books_data.columns.values
+                print(len(df_column))
+                print(df_column)
+                tree["column"] = list(books_data.columns)
+                tree["show"] = "headings"
+                vsb = ttk.Scrollbar(orient="vertical", command=tree.yview())
+                vsb.grid(column=8, row=4, sticky="ns")
+                tree.configure(yscrollcommand=vsb.set)
+
+                for column in tree['column']:
+                    tree.heading(column,text=column)
+
+                df_rows = books_data.to_numpy().tolist()
+                for row in df_rows:
+                    tree.insert("","end",values=row)
+                tree.grid(column=0,row=4,columnspan=8)
+
+            empty = Label(text="---", fg=NAVY_BLUE,bg=NAVY_BLUE)
+            empty.grid(column=1,row=1)
+            borrow_button = Button(image=borrow_button_logo,command=borrow_book)
+            borrow_button.grid(column=1,row=2, sticky="w",rowspan=2)
+            return_button = Button(image=return_button_logo)
+            return_button.grid(column=1,row=2,sticky="e",rowspan=2)
+
+            borrow_or_return_page.mainloop()
+        else:
+            print("bad soup")
+    def register_page():
+        def register_clicked():
+            please_pay = Label(text="❗Please pay ₱5 at the counter❗", font=("Roboto", 15,), fg=WHITE, bg=NAVY_BLUE)
+            please_pay.grid(column=0, row=6)
+            awaiting_payment = Label(text="Awaiting payment...", font=("Roboto", 15,), fg=WHITE, bg=NAVY_BLUE)
+            awaiting_payment.grid(column=0, row=7)
+            confirm_payment = Button(text="Confirm payment", fg=WHITE, bg=NAVY_BLUE, width=31, height=2,
+                                     activebackground=NAVY_BLUE, command=confirmed_payment)
+            confirm_payment.grid(column=0, row=8)
+
+        login_window.destroy()
+        register_page = Tk()
+        register_page.title("Register Form")
+        register_page.config(padx=20, pady=20, highlightthickness=0, bg=NAVY_BLUE)
+
+        user_registration = Canvas(width=954, height=144, bg=NAVY_BLUE, highlightthickness=0)
+        user_registration_logo = PhotoImage(file="image/user_registration-removebg-preview.png")
+        user_registration.create_image(450, 75, image=user_registration_logo)
+        user_registration.grid(column=0, row=0)
+
+        please_enter_the_following_informations = Label(text="Please enter the following informations.",
+                                                        font=("Roboto", 20,), fg=WHITE, bg=NAVY_BLUE)
+        please_enter_the_following_informations.grid(column=0, row=1)
+
+        name_label = Label(text="Name:", font=("Roboto", 10,), fg=WHITE, bg=NAVY_BLUE)
+        name_label.grid(column=0, row=2)
+
+        name = Entry(width=60)
+        name.insert(END, string="Please enter your name")
+        name.grid(column=0, row=3)
+        empty = Label(text="---", fg=NAVY_BLUE, bg=NAVY_BLUE)
+        empty.grid(column=0, row=4)
+        register_button = Button(text="REGISTER", fg=WHITE, bg="#FC5185", width=31, height=2,
+                                 activebackground="#FC5185", command=register_clicked)
+        register_button.grid(column=0, row=5)
+
+        def confirmed_payment():
+            global library_members_list
+            register_user = name.get()
+            register_user.upper()
+            library_members_list.append(register_user)
+            latest_members_list = [x.upper() for x in library_members_list]
+            new_data = pandas.DataFrame(latest_members_list,columns=["NAMES"])
+            new_data.to_csv("library_members.csv", index=False)
+            try:
+                library_members_data = pandas.read_csv("library_members.csv")
+            except FileNotFoundError:
+                library_members_data = pandas.read_csv("library_members - Sheet1 (1).csv")
+                library_members_list = library_members_data["NAMES"].to_list()
+            else:
+                library_members_list = library_members_data["NAMES"].to_list()
+            register_page.destroy()
+            landing_page()
+
+
+        register_page.mainloop()
+
+    login_window = Tk()
+    login_window.title("CASA DE COMMUNIDAD")
+    login_window.config(padx=20, pady=20, highlightthickness=0, bg=NAVY_BLUE)
+
+
+    main_logo = Canvas(width=743, height=336,bg=NAVY_BLUE, highlightthickness=0)
+    logo = PhotoImage(file="image/icon-removebg-preview.png")
+    main_logo.create_image(371, 168, image=logo)
+    main_logo.grid(column=0,row=0, rowspan=2)
+
+    bookshelf_logo = Canvas(width=756,height=310, bg=NAVY_BLUE, highlightthickness=0)
+    bookshelf_logo_icon = PhotoImage(file="image/bookslogo.png")
+    bookshelf_logo.create_image(378, 155, image=bookshelf_logo_icon)
+    bookshelf_logo.grid(column=0,row=4,rowspan=4)
+
+    account_logo = Canvas(width=109,height=96,bg=NAVY_BLUE,highlightthickness=0,)
+    account_logo_icon = PhotoImage(file="image/account logo.png")
+    account_logo.create_image(54.5,48, image=account_logo_icon)
+    account_logo.grid(column=3,row=1, columnspan=2,rowspan=2)
+
+    enter_your_name_here = Label(text="Enter your name here:", fg=WHITE, bg=NAVY_BLUE,font=("Roboto Slab", 9))
+    enter_your_name_here.grid(column=3,row=2,rowspan=2)
+
+    name_login = StringVar()
+    enter_name = Entry( width=30, textvariable=name_login)
+    enter_name.grid(column=3,row=2,rowspan=3)
+
+
+    sign_in = Button(text="SIGN IN", fg=WHITE, bg="#3FC1C9", width=31, height=2,activebackground = "#3FC1C9", command=login )
+    sign_in.grid(column=3,row=4,rowspan=2)
+
+    register_now = Button(text="REGISTER NOW", fg=WHITE, bg="#FC5185", width=31, height=2, activebackground = "#FC5185", command=register_page)
+    register_now.grid(column=3,row=5,rowspan=1)
+
+
+    login_window.mainloop()
+
+
+landing_page()
